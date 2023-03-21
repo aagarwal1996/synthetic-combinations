@@ -29,12 +29,19 @@ from fancyimpute import *
 
 
 def horizontal_only_fit(observed_matrix,horizontal_estimator = LassoCV(cv = 3)): 
+    """
+    Do a separate Lasso every unit. 
     
-    observed_matrix = deepcopy(observed_matrix)
+    Parameters
+    ----------
+    observed_matrix: numpy array with missing entries denoted by nan
+    """
+    
+    imputation_matrix = deepcopy(observed_matrix)
     fourier_characteristic_matrix = hadamard(observed_matrix.shape[1]) #2^number of items
     donor_unit_coefficients = []        
     for i in tqdm(range(observed_matrix.shape[0])):
-        unit_outcomes = observed_matrix[i,:]
+        unit_outcomes = imputation_matrix[i,:]
         non_nan_indices = np.argwhere(~np.isnan(unit_outcomes))
         non_nan_indices = [non_nan_indices[index][0] for index in range(len(non_nan_indices))]
                 
@@ -42,17 +49,27 @@ def horizontal_only_fit(observed_matrix,horizontal_estimator = LassoCV(cv = 3)):
         unit_observed_outcomes = unit_outcomes[non_nan_indices]
         unit_lasso_reg = horizontal_estimator.fit(unit_fourier_characteristic_matrix,unit_observed_outcomes)
                
-        observed_matrix[i,:] = unit_lasso_reg.predict(fourier_characteristic_matrix)
-    return observed_matrix
+        imputation_matrix[i,:] = unit_lasso_reg.predict(fourier_characteristic_matrix)
+    print(np.isnan(imputation_matrix).any())
+    return imputation_matrix
     
 def soft_impute_matrix_completion(observed_matrix,rank):
-    return SoftImpute(max_rank = rank).fit_transform(deeopcopy(observed_matrix))
+    """
+    Complete matrix completion via soft imputation  . 
+    """
+    return SoftImpute(max_rank = rank,verbose = False).fit_transform(deepcopy(observed_matrix))
 
 def MatrixFactorization_matrix_completion(observed_matrix,rank):
-    return MatrixFactorization(rank = r).fit_transform(deepcopy(observed_matrix))
+    """
+    Complete matrix completion via matrix factorization. 
+    """
+    return MatrixFactorization(rank = rank,verbose = False).fit_transform(deepcopy(observed_matrix))
 
-def IterativeSVD(observed_matrix,rank):
-    return IterativeSVD(rank = r).fit_transform(deepcopy(observed_matrix))
+def IterativeSVD_matrix_completion(observed_matrix,rank):
+    """
+    Complete matrix completion via Iterative SVD. 
+    """
+    return IterativeSVD(rank = rank,verbose = False).fit_transform(deepcopy(observed_matrix))
     
 
     

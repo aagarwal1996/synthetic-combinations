@@ -37,7 +37,7 @@ class synth_combo():
         self.max_rank = max_rank
         self.spectral_t = spectral_t
     
-    def horizontal_fit(self,observation_matrix,donor_unit_indices,horizontal_estimator = LassoCV(cv = 3)): 
+    def horizontal_fit(self,observation_matrix,donor_unit_indices,horizontal_estimator = LassoCV(cv = 5)): 
         """
         Does the horizontal regression via the lasso with regularization parameter chosen by cross-validation
         
@@ -104,21 +104,21 @@ class synth_combo():
         """
         principal component regression (PCR) 
         """
-        (u, s, v) = np.linalg.svd(X, full_matrices=False)
+        (u, s, v) = np.linalg.svd(X, full_matrices=False) 
         if self.max_rank is not None: 
             rank = self.max_rank 
         elif self.spectral_t is not None: 
             rank = self._spectral_rank(s)
         else: 
             (m, n) = X.shape 
-            rank = self._universal_rank(s, ratio=m/n)
+            rank = self._universal_rank(s, ratio=m/n) #choose num components according to Donoho & Gavish '14
         s_rank = s[:rank]
         u_rank = u[:, :rank]
         v_rank = v[:rank, :] 
-        beta = ((v_rank.T/s_rank) @ u_rank.T) @ y
+        beta = ((v_rank.T/s_rank) @ u_rank.T) @ y #compute regression vector
         return (beta, u_rank, s_rank, v_rank)
     
-    def _pcr_cv(self,X,y,num_folds = 3):
+    def _pcr_cv(self,X,y,num_folds = 5):
         """
         do principal component regression (PCR) choosing the number of components via CV 
         """
