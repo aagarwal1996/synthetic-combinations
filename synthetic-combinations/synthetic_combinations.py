@@ -1,25 +1,12 @@
-from copy import deepcopy
 from typing import List
-
 import numpy as np
-from sklearn import datasets
+from celer import LassoCV
 from tqdm import tqdm
-from sklearn.base import BaseEstimator, RegressorMixin, ClassifierMixin
 from sklearn.metrics import r2_score
-from sklearn.model_selection import cross_val_score
-from sklearn.model_selection import train_test_split
-from sklearn.tree import DecisionTreeRegressor, DecisionTreeClassifier,export_text
-from sklearn.ensemble import RandomForestRegressor
-#from sklearn.linear_model import LassoCV
-from celer import Lasso, LassoCV
 from sklearn.model_selection import KFold
-
 from scipy.linalg import hadamard
-from sklearn.decomposition import PCA
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import r2_score
 
-class synth_combo():
+class Synthetic_Combinations():
     """
     Impute counterfactuals for combinatorial interventions.
     """
@@ -50,7 +37,6 @@ class synth_combo():
         list of row indices that correspond to donor units
         """
         fourier_characteristic_matrix = hadamard(observation_matrix.shape[1]) # get matrix of fourier coefficients. 2^number of items
-        #donor_unit_coefficients = []
         for donor_unit in tqdm(donor_unit_indices): #perform horizontal regression for each donor unit
             donor_unit_outcomes = observation_matrix[donor_unit,:]
             non_nan_indices = np.argwhere(~np.isnan(donor_unit_outcomes)) #get non-missing entries
@@ -76,7 +62,6 @@ class synth_combo():
         donor_unit_indices: list
         list of row indices that correspond to donor units
         """
-        fourier_characteristic_matrix = hadamard(horizontal_imputed_observation_matrix.shape[1]) # get matrix of fourier coefficients. 2^number of items
         N = horizontal_imputed_observation_matrix.shape[0] #Number of units
         indices = set([i for i in range(N)])
         non_donor_unit_indices = list(indices.difference(set(donor_unit_indices))) #get indices for non-donor units
@@ -85,7 +70,6 @@ class synth_combo():
             non_nan_indices = np.argwhere(~np.isnan(n_outcomes))
             non_nan_indices = [non_nan_indices[index][0] for index in range(len(non_nan_indices))]
         
-            n_fourier_characteristic_matrix = fourier_characteristic_matrix[non_nan_indices,:] #X matrix used for non-donor unit
             n_observed_outcomes = n_outcomes[non_nan_indices] #observed outcomes for non-donor unit 
             donor_unit_outcomes = horizontal_imputed_observation_matrix[donor_unit_indices,:] 
             donor_unit_n_outcomes = donor_unit_outcomes[:,non_nan_indices] #imputed outcomes for donor set corresponding to observations of non-donor unit
@@ -145,9 +129,9 @@ class synth_combo():
         average_error = np.nanmean(cv_error,axis = 0)
         opt_rank = np.argmax(average_error)
         
-        s_rank = s[:rank]
-        u_rank = u[:, :rank]
-        v_rank = v[:rank, :] 
+        s_rank = s[:opt_rank]
+        u_rank = u[:, :opt_rank]
+        v_rank = v[:opt_rank, :] 
         beta = ((v_rank.T/s_rank) @ u_rank.T) @ y
         return (beta, u_rank, s_rank, v_rank)
         
@@ -169,13 +153,3 @@ class synth_combo():
         t = omega * np.median(s) 
         rank = max(len(s[s>t]), 1)
         return rank 
-    
-    
-    
-    
-      #pca = PCA(n_components = num_components)
-            #X_pca = pca.fit_transform(donor_unit_n_outcomes.T)
-            #regr = LinearRegression(fit_intercept=True)
-            #regr.fit(X_pca,n_observed_outcomes)
-            #X_donor_pca = pca.transform(horizontal_imputed_observation_matrix[donor_unit_indices,:].T)
-            #n_preds = regr.predict(X_donor_pca)
