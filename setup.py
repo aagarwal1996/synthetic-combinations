@@ -6,8 +6,8 @@ with open("README.md", "r") as fh:
     # username => aagarwal1996
 
 setuptools.setup(
-    name="synthetic-combinations",
-    version="0.0.1",
+    name="synthetic_combinations",
+    version="0.0.2",
     author="Abhineet Agarwal, Anish Agarwal, Suhas Vijaykumar",
     author_email="aa3797@berkeley.edu",
     description="Imputing counterfactual outcomes for combinatorial interventions",
