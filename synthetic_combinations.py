@@ -1,23 +1,10 @@
-from copy import deepcopy
 from typing import List
-
 import numpy as np
-from sklearn import datasets
+from celer import LassoCV
 from tqdm import tqdm
-from sklearn.base import BaseEstimator, RegressorMixin, ClassifierMixin
 from sklearn.metrics import r2_score
-from sklearn.model_selection import cross_val_score
-from sklearn.model_selection import train_test_split
-from sklearn.tree import DecisionTreeRegressor, DecisionTreeClassifier,export_text
-from sklearn.ensemble import RandomForestRegressor
-#from sklearn.linear_model import LassoCV
-from celer import Lasso, LassoCV
 from sklearn.model_selection import KFold
-
 from scipy.linalg import hadamard
-from sklearn.decomposition import PCA
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import r2_score
 
 class synth_combo():
     """
@@ -50,7 +37,6 @@ class synth_combo():
         list of row indices that correspond to donor units
         """
         fourier_characteristic_matrix = hadamard(observation_matrix.shape[1]) # get matrix of fourier coefficients. 2^number of items
-        #donor_unit_coefficients = []
         for donor_unit in tqdm(donor_unit_indices): #perform horizontal regression for each donor unit
             donor_unit_outcomes = observation_matrix[donor_unit,:]
             non_nan_indices = np.argwhere(~np.isnan(donor_unit_outcomes)) #get non-missing entries
