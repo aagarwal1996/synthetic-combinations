@@ -3,8 +3,6 @@ import setuptools
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-    # username => aagarwal1996
-
 setuptools.setup(
     name="synthetic_combinations",
     version="0.0.2",
@@ -53,5 +51,5 @@ setuptools.setup(
         "urllib3==1.26.15",
         "xarray==2023.3.0"
     ],
-    python_requires='>=3.6',
+    python_requires='>=3.9',
 )
